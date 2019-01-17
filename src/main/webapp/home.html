@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>home</title>
+</head>
+<body>
+<div id="app">
+<a href="#" style="margin-right: 100px" @click="div1=true;div2=false;div3=true;getMyTaskList()">我的任务</a>
+    <a href="#" style="margin-right: 100px" @click="div2=true;div1=false;div3=false">申请费用报销</a>
+    <a href="login.html" >注销</a>
+
+    <div>
+        <div  v-show="div1" style="float: left">
+            <ul>
+                <li v-for="t in taskList">{{t.assignee}}:{{t.name}}   <a href="#" @click="complete(t.id)">完成</a>||<a href="#" @click="showTaskDetail(t.processInstanceId)">详情</a></li>
+            </ul>
+        </div>
+
+        <div v-show="div3" style="float: left;margin:20px 0px 0px 20px">
+            {{taskDetail.name}}--{{taskDetail.city}}--{{taskDetail.days}}--{{taskDetail.money}}
+        </div>
+    </div>
+    <div  v-show="div2">
+       出差城市: <input type="text" v-model="reimbursement.city"> <br>
+       出差天数: <input type="text" v-model="reimbursement.days"> <br>
+       报销金额: <input type="text" v-model="reimbursement.money"> <br>
+        <input type="button" value="开始报销" @click="baoxiao">
+    </div>
+
+
+
+</div>
+
+<!-- 开发环境版本，包含了用帮助的命令行警告 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var  vue = new Vue({
+        el:"#app",
+        data:{
+            taskList:{
+            },
+            div1:true,
+            div2:false,
+            div3:false,
+            reimbursement:{
+                city:'成都',
+                days:7,
+                money:2000
+            },
+            taskDetail:{
+                city:"",
+                days:"",
+                money:""
+            }
+        },
+        methods:{
+            //完成
+            complete:function (taskId) {
+                axios({
+                    url:"workflow/complete/"+taskId,
+                    method:"put"
+                }).then(function (value) {
+                    //刷新
+                    vue.getMyTaskList();
+                    vue.div3=false;
+                })
+            },
+            //获取我的任务列表
+            getMyTaskList:function () {
+
+                axios({
+                    url:"workflow/myTaskList",
+                    method:"get"
+                }).then(function (resp) {
+                    vue.taskList = resp.data;
+                }).catch(function (reason) {
+                    location.href="login.html";
+                })
+            },
+            //报销
+            baoxiao:function () {
+                axios({
+                    url:"baoxiao",
+                    method:"post",
+                    data:this.reimbursement
+                }).then(function (resp) {
+                    alert("报销流程已经开始，请在[我的任务]中处理");
+                    vue.taskList = resp.data;
+                }).catch(function (reason) {
+                    alert("报销失败");
+                })
+            },
+            //任务详情
+            showTaskDetail:function (processInstanceId) {
+                vue.div3 = true;
+                axios({
+                    url:"workflow/taskDetail/"+processInstanceId,
+                    method:"get"
+                }).then(function (resp) {
+                    vue.taskDetail = resp.data;
+                })
+            }
+        },
+        mounted:function () {
+            this.getMyTaskList();
+        }
+    });
+</script>
+</body>
+</html>

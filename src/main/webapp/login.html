@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>login</title>
+
+</head>
+<body>
+<div id="app">
+    用户名:
+
+    <select v-model="username">
+        <option value="员工">员工</option>
+        <option value="部门经理">部门经理</option>
+        <option value="老板">老板</option>
+    </select>
+    <br>
+    <input type="button" value="登陆" @click="login"/>
+</div>
+
+<!-- 开发环境版本，包含了用帮助的命令行警告 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var  vue = new Vue({
+        el:"#app",
+        data:{
+            username:"员工",
+            employee:{
+                username:"员工",
+                manager:"部门经理"
+            },
+            deptManager:{
+                username:"部门经理",
+                manager:"老板"
+            },
+            boss:{
+                username:"老板",
+                manager:""
+            }
+        },
+        methods:{
+            login:function () {
+                var user = null;
+                if(vue.username === '员工')
+                {
+                    user = vue.employee;
+                }
+                else if(vue.username === '部门经理')
+                {
+                    user = vue.deptManager;
+                }
+                else
+                {
+                    user = vue.boss;
+                }
+                axios({
+                    url:"login",
+                    method:"post",
+                    data:user
+                }).then(function (resp) {
+                    //直接到主页去
+                    location.href="home.html";
+                })
+            }
+        }
+    });
+</script>
+</body>
+</html>
